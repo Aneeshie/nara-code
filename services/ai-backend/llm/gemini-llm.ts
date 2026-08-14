@@ -68,7 +68,10 @@ const toModelOutput = (message: Message): ModelMessage => {
                     type: "tool-result",
                     toolCallId: message.toolCallId,
                     toolName: message.toolCallName,
-                    output: JSON.parse(message.content),
+                    output: {
+                        type: "text",
+                        value: JSON.parse(message.content),
+                    },
                 },
             ],
         }

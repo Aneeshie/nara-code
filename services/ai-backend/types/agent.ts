@@ -2,6 +2,7 @@
 import {ZodType} from "zod"
 
 export type Message = {    
+    id: string
     content: string     
     role: 'user' | 'assistant' | 'system' | 'tool'
 
