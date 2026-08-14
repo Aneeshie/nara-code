@@ -2,11 +2,12 @@
 import {ZodType} from "zod"
 
 export type Message = {    
-    message: string     
+    content: string     
     role: 'user' | 'assistant' | 'system' | 'tool'
 
     toolCallId?: string 
-    toolCallName: string 
+    toolCallName?: string 
+    toolArguments?: unknown
 }
 
 // tool
