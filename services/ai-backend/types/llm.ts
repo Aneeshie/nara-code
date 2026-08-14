@@ -1,4 +1,3 @@
-import { Message } from "./agent"
 
 export type LLMResponse = {
     message: string

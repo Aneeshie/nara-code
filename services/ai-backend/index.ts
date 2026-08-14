@@ -10,7 +10,7 @@ const messages: Message[] = [
     {
         id: crypto.randomUUID(),
         role: "user",
-        content: "Read tsconfig.json and tell me the contents of it."
+        content: "can u list the directories available"
     }
 ]
 

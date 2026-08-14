@@ -3,6 +3,7 @@ import { GeminiLLM } from "../llm/gemini-llm";
 import { Message, Tool } from "../types/agent";
 import { ReadFromFile } from "../tools/read-fie";
 import { LLM } from "../llm/llm";
+import { ListDirectories } from "../tools/list_directory";
 
 const MAX_ITER = 12
 
@@ -11,7 +12,7 @@ export class Agent {
     
 
     constructor(private readonly llm: LLM,) {
-        this.tools = [new ReadFromFile()]
+        this.tools = [new ReadFromFile(), new ListDirectories()]
     }
 
 
