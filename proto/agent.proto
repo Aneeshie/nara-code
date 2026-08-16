@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package agent;
+
+option go_package = "github.com/Aneeshie/nara-code/services/backend/internal/grpc/pb";
+
+service AgentService {
+    rpc RunAgent(AgentRequest) returns (stream AgentResponse);
+}
+
+message AgentRequest {
+    string message = 1;
+}
+
+message AgentResponse {
+    string message = 1;
+}

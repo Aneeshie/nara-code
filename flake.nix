@@ -22,6 +22,9 @@
             golangci-lint
             bun
             nodejs
+            protobuf
+            protoc-gen-go
+            protoc-gen-go-grpc
           ];
 
           shellHook = ''
