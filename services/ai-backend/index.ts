@@ -18,4 +18,3 @@ for await (const event of agent.stream(messages)){
     console.log("EVENT: ")
     console.dir(event, {depth: null})
 }
-
