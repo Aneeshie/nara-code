@@ -10,10 +10,12 @@ const messages: Message[] = [
     {
         id: crypto.randomUUID(),
         role: "user",
-        content: "can u list the directories available"
+        content: "Explore the project and tell me how the backend is structured."
     }
 ]
 
-const data = await agent.run(messages)
+for await (const event of agent.stream(messages)){
+    console.log("EVENT: ")
+    console.dir(event, {depth: null})
+}
 
-console.log(data)

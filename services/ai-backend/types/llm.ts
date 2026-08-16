@@ -5,7 +5,30 @@ export type LLMResponse = {
 }
 
 export type ToolCall = {
-    id: string 
-    name: string 
+    id: string
+    name: string
     arguments: unknown
 }
+
+export type LLMEvent =  LLMEventTextDelta  | LLMEventToolCall
+
+export type LLMEventToolCall =
+{
+  type: "tool-call"
+  data: {
+    id: string
+    name: string
+    arguments: unknown
+  }
+}
+
+export type LLMEventTextDelta =
+{
+  type: "text-delta"
+  data: {
+    text: string
+  }
+}
+
+
+
