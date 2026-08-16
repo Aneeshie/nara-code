@@ -2,11 +2,16 @@ import * as grpc from "@grpc/grpc-js"
 import * as protoLoader from "@grpc/proto-loader"
 import { fileURLToPath } from "url"
 import {dirname, join} from "path"
+import { Message } from "../types/agent"
+import { GeminiLLM } from "../llm/gemini-llm"
+import { Agent } from "../agent/agent"
 
 //path to the shared contract.
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const PROTO_PATH = join(__dirname, "../../../proto/agent.proto")
+
+const agent = new Agent(new GeminiLLM())
 
 interface AgentRequest {message: string}
 interface AgentResponse {message: string}
@@ -30,16 +35,35 @@ const proto = grpc.loadPackageDefinition(packageDefinition).agent as unknown as 
 }
 
 
-const runAgent: grpc.handleServerStreamingCall<AgentRequest, AgentResponse> = (call) => {
+const runAgent: grpc.handleServerStreamingCall<AgentRequest, AgentResponse> = async (call) => {
   //read the request
-  const message = call.request.message
-  console.log("server got: ", message)
+  const userMessage : Message = {
+    id: crypto.randomUUID(),
+    role: "user",
+    content: call.request.message
 
-  //send multiple responses
-  for (const chunk of ["HELLO", "WORLD", "!"]) {
-    call.write({message: chunk})
   }
 
+  let ended = false;
+
+  const finish = () => {
+    if(!ended) {ended= true, call.end()}
+  }
+
+  try {
+    for await (const event of agent.stream([userMessage])) {
+      if(event.type === "text-delta"){
+        call.write({message: event.data.text})
+      }else if(event.type === "done") {
+        finish()
+        return
+      }
+    }
+    finish()
+  }catch(e){
+    call.destroy(e as Error)
+  }
+ 
   call.end()
 }
 

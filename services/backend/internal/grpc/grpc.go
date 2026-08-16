@@ -23,7 +23,7 @@ func CallAgent(aiAddr string) {
 	client := pb.NewAgentServiceClient(conn)
 
 	//run the agent
-	stream, err := client.RunAgent(context.Background(), &pb.AgentRequest{Message: "hi"})
+	stream, err := client.RunAgent(context.Background(), &pb.AgentRequest{Message: "can list down the directories in this project"})
 	if err != nil {
 		log.Fatalf("RunAgent failed: %v", err)
 	}
