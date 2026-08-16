@@ -8,12 +8,14 @@ import (
 )
 
 type Config struct {
-	PORT string
+	PORT    string
+	AI_PORT string
 }
 
-func NewConfig(PORT string) *Config {
+func NewConfig(PORT string, AI_PORT string) *Config {
 	return &Config{
-		PORT: PORT,
+		PORT:    PORT,
+		AI_PORT: AI_PORT,
 	}
 }
 
@@ -25,7 +27,9 @@ func Load() *Config {
 
 	port := os.Getenv("PORT")
 
-	cfg := NewConfig(port)
+	aiAddr := os.Getenv("AI_PORT")
+
+	cfg := NewConfig(port, aiAddr)
 
 	return cfg
 }

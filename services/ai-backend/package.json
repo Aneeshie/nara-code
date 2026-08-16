@@ -1,0 +1,8 @@
+{
+  "name": "ai-backend",
+  "type": "module",
+  "scripts": {
+    "start": "bun run grpc/server.ts"
+  }
+
+}
