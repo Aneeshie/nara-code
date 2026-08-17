@@ -2,42 +2,28 @@ package grpc
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"log"
 
+	"github.com/Aneeshie/nara-code/internal/ws/dto"
 	pb "github.com/Aneeshie/nara-code/proto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
-func CallAgent(aiAddr string) {
-	conn, err := grpc.NewClient("localhost:"+aiAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		log.Fatalf("dial failed: %v", err)
+type AgentClient struct {
+	client pb.AgentServiceClient
+}
+
+func NewAgentClient(conn *grpc.ClientConn) *AgentClient {
+	return &AgentClient{
+		client: pb.NewAgentServiceClient(conn),
 	}
+}
 
-	defer conn.Close()
+func (a *AgentClient) RunAgent(ctx context.Context, message *dto.Message) (grpc.ServerStreamingClient[pb.AgentResponse], error) {
 
-	//get the typed client
-	client := pb.NewAgentServiceClient(conn)
-
-	//run the agent
-	stream, err := client.RunAgent(context.Background(), &pb.AgentRequest{Message: "can list down the directories in this project"})
-	if err != nil {
-		log.Fatalf("RunAgent failed: %v", err)
-	}
-
-	for {
-		resp, err := stream.Recv()
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			log.Fatalf("recv error: %v", err)
-		}
-
-		fmt.Println(resp.GetMessage()) // print each streamed chunk
-	}
+	return a.client.RunAgent(
+		ctx,
+		&pb.AgentRequest{
+			Message: message.Content,
+		},
+	)
 }

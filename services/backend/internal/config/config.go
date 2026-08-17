@@ -8,14 +8,14 @@ import (
 )
 
 type Config struct {
-	PORT    string
-	AI_PORT string
+	WS_PORT   string
+	GRPC_PORT string
 }
 
-func NewConfig(PORT string, AI_PORT string) *Config {
+func NewConfig(WS_PORT string, GRPC_PORT string) *Config {
 	return &Config{
-		PORT:    PORT,
-		AI_PORT: AI_PORT,
+		WS_PORT:   WS_PORT,
+		GRPC_PORT: GRPC_PORT,
 	}
 }
 
@@ -25,11 +25,11 @@ func Load() *Config {
 		log.Fatal("Could not load .env")
 	}
 
-	port := os.Getenv("PORT")
+	wsPort := os.Getenv("WS_PORT")
 
-	aiAddr := os.Getenv("AI_PORT")
+	gRPCPORT := os.Getenv("GRPC_PORT")
 
-	cfg := NewConfig(port, aiAddr)
+	cfg := NewConfig(wsPort, gRPCPORT)
 
 	return cfg
 }

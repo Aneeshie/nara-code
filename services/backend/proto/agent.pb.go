@@ -21,6 +21,58 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type EventType int32
+
+const (
+	EventType_EVENT_TYPE_UNSPECIFIED EventType = 0
+	EventType_TEXT_DELTA             EventType = 1
+	EventType_TOOL_CALL              EventType = 2
+	EventType_DONE                   EventType = 3
+)
+
+// Enum value maps for EventType.
+var (
+	EventType_name = map[int32]string{
+		0: "EVENT_TYPE_UNSPECIFIED",
+		1: "TEXT_DELTA",
+		2: "TOOL_CALL",
+		3: "DONE",
+	}
+	EventType_value = map[string]int32{
+		"EVENT_TYPE_UNSPECIFIED": 0,
+		"TEXT_DELTA":             1,
+		"TOOL_CALL":              2,
+		"DONE":                   3,
+	}
+)
+
+func (x EventType) Enum() *EventType {
+	p := new(EventType)
+	*p = x
+	return p
+}
+
+func (x EventType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (EventType) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_agent_proto_enumTypes[0].Descriptor()
+}
+
+func (EventType) Type() protoreflect.EnumType {
+	return &file_proto_agent_proto_enumTypes[0]
+}
+
+func (x EventType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use EventType.Descriptor instead.
+func (EventType) EnumDescriptor() ([]byte, []int) {
+	return file_proto_agent_proto_rawDescGZIP(), []int{0}
+}
+
 type AgentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
@@ -68,6 +120,7 @@ func (x *AgentRequest) GetMessage() string {
 type AgentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Event         EventType              `protobuf:"varint,2,opt,name=event,proto3,enum=agent.EventType" json:"event,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -109,15 +162,29 @@ func (x *AgentResponse) GetMessage() string {
 	return ""
 }
 
+func (x *AgentResponse) GetEvent() EventType {
+	if x != nil {
+		return x.Event
+	}
+	return EventType_EVENT_TYPE_UNSPECIFIED
+}
+
 var File_proto_agent_proto protoreflect.FileDescriptor
 
 const file_proto_agent_proto_rawDesc = "" +
 	"\n" +
 	"\x11proto/agent.proto\x12\x05agent\"(\n" +
 	"\fAgentRequest\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\")\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"Q\n" +
 	"\rAgentResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2G\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\x12&\n" +
+	"\x05event\x18\x02 \x01(\x0e2\x10.agent.EventTypeR\x05event*P\n" +
+	"\tEventType\x12\x1a\n" +
+	"\x16EVENT_TYPE_UNSPECIFIED\x10\x00\x12\x0e\n" +
+	"\n" +
+	"TEXT_DELTA\x10\x01\x12\r\n" +
+	"\tTOOL_CALL\x10\x02\x12\b\n" +
+	"\x04DONE\x10\x032G\n" +
 	"\fAgentService\x127\n" +
 	"\bRunAgent\x12\x13.agent.AgentRequest\x1a\x14.agent.AgentResponse0\x01BAZ?github.com/Aneeshie/nara-code/services/backend/internal/grpc/pbb\x06proto3"
 
@@ -133,19 +200,22 @@ func file_proto_agent_proto_rawDescGZIP() []byte {
 	return file_proto_agent_proto_rawDescData
 }
 
+var file_proto_agent_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_proto_agent_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_proto_agent_proto_goTypes = []any{
-	(*AgentRequest)(nil),  // 0: agent.AgentRequest
-	(*AgentResponse)(nil), // 1: agent.AgentResponse
+	(EventType)(0),        // 0: agent.EventType
+	(*AgentRequest)(nil),  // 1: agent.AgentRequest
+	(*AgentResponse)(nil), // 2: agent.AgentResponse
 }
 var file_proto_agent_proto_depIdxs = []int32{
-	0, // 0: agent.AgentService.RunAgent:input_type -> agent.AgentRequest
-	1, // 1: agent.AgentService.RunAgent:output_type -> agent.AgentResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: agent.AgentResponse.event:type_name -> agent.EventType
+	1, // 1: agent.AgentService.RunAgent:input_type -> agent.AgentRequest
+	2, // 2: agent.AgentService.RunAgent:output_type -> agent.AgentResponse
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_proto_agent_proto_init() }
@@ -158,13 +228,14 @@ func file_proto_agent_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_agent_proto_rawDesc), len(file_proto_agent_proto_rawDesc)),
-			NumEnums:      0,
+			NumEnums:      1,
 			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_proto_agent_proto_goTypes,
 		DependencyIndexes: file_proto_agent_proto_depIdxs,
+		EnumInfos:         file_proto_agent_proto_enumTypes,
 		MessageInfos:      file_proto_agent_proto_msgTypes,
 	}.Build()
 	File_proto_agent_proto = out.File

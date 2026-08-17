@@ -56,7 +56,7 @@ export class GeminiLLM implements LLM {
 
     for await (const part of result.stream) {
 
-      console.log("SDK PART:", part)
+      //console.log("SDK PART:", part)
 
       switch (part.type) {
         case "text-delta":

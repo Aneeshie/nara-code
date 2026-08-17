@@ -14,4 +14,12 @@ message AgentRequest {
 
 message AgentResponse {
     string message = 1;
+    EventType event = 2;
+}
+
+enum EventType {
+    EVENT_TYPE_UNSPECIFIED = 0;
+    TEXT_DELTA = 1;
+    TOOL_CALL = 2;
+    DONE = 3;
 }

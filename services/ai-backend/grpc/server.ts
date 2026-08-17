@@ -2,7 +2,7 @@ import * as grpc from "@grpc/grpc-js"
 import * as protoLoader from "@grpc/proto-loader"
 import { fileURLToPath } from "url"
 import {dirname, join} from "path"
-import { Message } from "../types/agent"
+import { AgentEvent, Message } from "../types/agent"
 import { GeminiLLM } from "../llm/gemini-llm"
 import { Agent } from "../agent/agent"
 
@@ -13,8 +13,15 @@ const PROTO_PATH = join(__dirname, "../../../proto/agent.proto")
 
 const agent = new Agent(new GeminiLLM())
 
+const eventTypeMap = {
+  "text-delta": 1,
+  "tool-call": 2,
+  "done": 3,
+} as const
+
 interface AgentRequest {message: string}
-interface AgentResponse {message: string}
+interface AgentResponse {message: string, event: number}
+
 
 
 // read the .proto file
@@ -53,8 +60,11 @@ const runAgent: grpc.handleServerStreamingCall<AgentRequest, AgentResponse> = as
   try {
     for await (const event of agent.stream([userMessage])) {
       if(event.type === "text-delta"){
-        call.write({message: event.data.text})
-      }else if(event.type === "done") {
+        call.write({message: event.data.text, event: eventTypeMap[event.type]})
+      }else if (event.type === "tool-call"){
+        call.write({message: event.data.name, event: eventTypeMap[event.type]})
+      }
+      else if(event.type === "done") {
         finish()
         return
       }
