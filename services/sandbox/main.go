@@ -37,4 +37,17 @@ func main() {
 		log.Fatalf("SetBootSource failed: %v", err)
 	}
 	fmt.Println("BOOT SOURCE OK")
+
+	err = client.SetDrive(firecracker.RootFsConfig{
+		DriveID:      "rootfs",
+		PathOnHost:   "/home/aneeshie/sandbox/ubuntu-24.04.ext4",
+		IsRootDevice: true,
+		IsReadOnly:   false,
+	})
+
+	if err != nil {
+		log.Fatalf("SetDrive failed: %v", err)
+	}
+	fmt.Println("DRIVE OK")
+
 }

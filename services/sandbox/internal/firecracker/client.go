@@ -52,6 +52,27 @@ type BootSourceConfig struct {
 	BootArgs string `json:"boot_args,omitempty"`
 }
 
+type RootFsConfig struct {
+	// Unique identifier of the drive.
+	DriveID string `json:"drive_id"`
+	/// Part-UUID. Represents the unique id of the boot partition of this device. It is
+	/// optional and it will be used only if the `is_root_device` field is true.
+	PartitionUUID string `json:"partition_uuid,omitempty"`
+	/// If set to true, it makes the current device the root block device.
+	/// Setting this flag to true will mount the block device in the
+	/// guest under /dev/vda unless the partuuid is present.
+	IsRootDevice bool `json:"is_root_device"`
+	// VirtioBlock specific fields
+	/// If set to true, the drive is opened in read-only mode. Otherwise, the
+	/// drive is opened as read-write.
+	IsReadOnly bool `json:"is_read_only,omitempty"`
+	/// Path of the drive.
+	PathOnHost string `json:"path_on_host"`
+	// VhostUserBlock specific fields
+	/// Path to the vhost-user socket.
+	SocketPath string `json:"socket_path,omitempty"`
+}
+
 type LevelFilter string
 
 const (
@@ -130,4 +151,12 @@ func (c *Client) SetLogger(cfg LoggerConfig) error {
 
 func (c *Client) SetBootSource(cfg BootSourceConfig) error {
 	return c.do(http.MethodPut, "boot-source", cfg)
+}
+
+func (c *Client) SetRootFs(cfg RootFsConfig) error {
+	return c.do(http.MethodPut, "drives/rootfs", cfg)
+}
+
+func (c *Client) SetDrive(cfg RootFsConfig) error {
+	return c.do(http.MethodPut, "drives/rootfs", cfg)
 }
