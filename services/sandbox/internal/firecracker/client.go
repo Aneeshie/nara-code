@@ -73,6 +73,15 @@ type RootFsConfig struct {
 	SocketPath string `json:"socket_path,omitempty"`
 }
 
+type NetworkInterfaceConfig struct {
+	/// ID of the guest network interface.
+	IfaceID string `json:"iface_id"`
+	/// Host level path for the guest network interface.
+	HostDevName string `json:"host_dev_name"`
+	/// Guest MAC address
+	GuestMAC string `json:"guest_mac,omitempty"`
+}
+
 type LevelFilter string
 
 const (
@@ -159,4 +168,8 @@ func (c *Client) SetRootFs(cfg RootFsConfig) error {
 
 func (c *Client) SetDrive(cfg RootFsConfig) error {
 	return c.do(http.MethodPut, "drives/rootfs", cfg)
+}
+
+func (c *Client) SetNetworkInterface(cfg NetworkInterfaceConfig) error {
+	return c.do(http.MethodPut, "network-interfaces/"+cfg.IfaceID, cfg)
 }

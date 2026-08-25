@@ -50,4 +50,14 @@ func main() {
 	}
 	fmt.Println("DRIVE OK")
 
+	err = client.SetNetworkInterface(firecracker.NetworkInterfaceConfig{
+		IfaceID:     "net1",
+		HostDevName: "tap0",
+		GuestMAC:    "06:00:AC:10:00:02",
+	})
+	if err != nil {
+		log.Fatalf("SetNetworkInterface failed: %v", err)
+	}
+	fmt.Println("NETWORK INTERFACE OK")
+
 }
