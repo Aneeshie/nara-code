@@ -11,14 +11,14 @@ import (
 func main() {
 	socketPath := "/tmp/firecracker.socket"
 
-	//fail fast with a reasonable message if irecracker isnt up
+	//fail fast with a reasonable message if firecracker isnt up
 	if _, err := os.Stat(socketPath); err != nil {
 		log.Fatalf("no socket at %s — is firecracker running?", socketPath)
 	}
 
 	client := firecracker.NewClient(socketPath)
 
-	err := client.SetLogger(&firecracker.LoggerConfig{
+	err := client.SetLogger(firecracker.LoggerConfig{
 		LogPath:       "/home/aneeshie/sandbox/firecracker-go.log",
 		Level:         firecracker.LevelFilterInfo,
 		ShowLevel:     true,
@@ -27,6 +27,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("SetLogger failed: %v", err)
 	}
-
 	fmt.Println("LOGGER OK")
+
+	err = client.SetBootSource(firecracker.BootSourceConfig{
+		KernelImagePath: "/home/aneeshie/sandbox/vmlinux-6.18.41",
+		BootArgs:        "console=ttyS0 reboot=k panic=1",
+	})
+	if err != nil {
+		log.Fatalf("SetBootSource failed: %v", err)
+	}
+	fmt.Println("BOOT SOURCE OK")
 }

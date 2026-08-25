@@ -8,6 +8,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"time"
 )
 
 type Client struct {
@@ -15,15 +16,40 @@ type Client struct {
 	base       string
 }
 
+// ClientError is returned when Firecracker rejects a request with a non-2xx status.
+type ClientError struct {
+	Method       string
+	Path         string
+	StatusCode   int
+	FaultMessage string
+}
+
+func (e *ClientError) Error() string {
+	if e.FaultMessage != "" {
+		return fmt.Sprintf("firecracker %s %s: %d: %s", e.Method, e.Path, e.StatusCode, e.FaultMessage)
+	}
+	return fmt.Sprintf("firecracker %s %s: unexpected status %d", e.Method, e.Path, e.StatusCode)
+}
+
 type LoggerConfig struct {
-	/// Named pipe or file used as output for logs.
+	// Named pipe or file used as output for logs.
 	LogPath string `json:"log_path,omitempty"`
-	/// The level of the Logger.
+	// The level of the logger.
 	Level LevelFilter `json:"level,omitempty"`
-	/// Whether to show the log level in the log.
+	// Whether to show the log level in the log.
 	ShowLevel bool `json:"show_level,omitempty"`
-	/// Whether to show the log origin in the log.
+	// Whether to show the log origin in the log.
 	ShowLogOrigin bool `json:"show_log_origin,omitempty"`
+}
+
+type BootSourceConfig struct {
+	// Path of the kernel image.
+	KernelImagePath string `json:"kernel_image_path"`
+	// Path of the initrd, if there is one.
+	InitrdPath string `json:"initrd_path,omitempty"`
+	// The boot arguments to pass to the kernel. If this field is uninitialized,
+	// DEFAULT_KERNEL_CMDLINE is used.
+	BootArgs string `json:"boot_args,omitempty"`
 }
 
 type LevelFilter string
@@ -47,48 +73,61 @@ func NewClient(socketPath string) *Client {
 
 	client := http.Client{
 		Transport: &transport,
+		Timeout:   5 * time.Second,
 	}
 
 	return &Client{
 		httpClient: &client,
 		base:       "http://localhost/",
 	}
-
 }
 
-func (c *Client) SetLogger(cfg *LoggerConfig) error {
-	//marshal the config first
-	jsonData, err := json.Marshal(cfg)
+// do sends one request to the Firecracker API socket. It returns a
+// *ClientError for any non-2xx response, carrying the fault_message if present.
+func (c *Client) do(method, path string, body any) error {
+	data, err := json.Marshal(body)
 	if err != nil {
-		return err
+		return fmt.Errorf("marshal %s %s: %w", method, path, err)
 	}
 
-	req, err := http.NewRequest("PUT", c.base+"logger", bytes.NewReader(jsonData))
+	req, err := http.NewRequest(method, c.base+path, bytes.NewReader(data))
 	if err != nil {
-		return err
+		return fmt.Errorf("build request %s %s: %w", method, path, err)
 	}
+	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s %s: %w", method, path, err)
 	}
-
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return fmt.Errorf("read response %s %s: %w", method, path, err)
 	}
 
-	fmt.Println(string(body))
-	return nil
+	if resp.StatusCode >= 300 {
+		var fault struct {
+			FaultMessage string `json:"fault_message"`
+		}
+		_ = json.Unmarshal(respBody, &fault)
 
+		return &ClientError{
+			Method:       method,
+			Path:         path,
+			StatusCode:   resp.StatusCode,
+			FaultMessage: fault.FaultMessage,
+		}
+	}
+
+	return nil
 }
 
-// func (c *Client) SetBootSource() error
-// func (c *Client) SetRootFs() error
-// func (c *Client) SetActions() error
+func (c *Client) SetLogger(cfg LoggerConfig) error {
+	return c.do(http.MethodPut, "logger", cfg)
+}
+
+func (c *Client) SetBootSource(cfg BootSourceConfig) error {
+	return c.do(http.MethodPut, "boot-source", cfg)
+}
