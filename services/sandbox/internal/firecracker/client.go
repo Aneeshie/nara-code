@@ -93,6 +93,18 @@ const (
 	LevelFilterError LevelFilter = "Error"
 )
 
+type ActionType string
+
+type ActionConfig struct {
+	ActionType ActionType `json:"action_type"`
+}
+
+const (
+	ActionFlushMetrics   ActionType = "FlushMetrics"
+	ActionInstanceStart  ActionType = "InstanceStart"
+	ActionSendCtrlAltDel ActionType = "SendCtrlAltDel"
+)
+
 func NewClient(socketPath string) *Client {
 	transport := http.Transport{
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
@@ -172,4 +184,8 @@ func (c *Client) SetDrive(cfg RootFsConfig) error {
 
 func (c *Client) SetNetworkInterface(cfg NetworkInterfaceConfig) error {
 	return c.do(http.MethodPut, "network-interfaces/"+cfg.IfaceID, cfg)
+}
+
+func (c *Client) SetActions(cfg ActionConfig) error {
+	return c.do(http.MethodPut, "actions", cfg)
 }

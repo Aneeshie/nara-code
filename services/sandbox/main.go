@@ -60,4 +60,12 @@ func main() {
 	}
 	fmt.Println("NETWORK INTERFACE OK")
 
+	err = client.SetActions(firecracker.ActionConfig{
+		ActionType: firecracker.ActionInstanceStart,
+	})
+	if err != nil {
+		log.Fatalf("SetActions failed: %v", err)
+	}
+	fmt.Println("ACTIONS OK")
+
 }
