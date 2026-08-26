@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/Aneeshie/sandbox/internal/firecracker"
@@ -27,7 +28,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = network.EnableInternetAccess(alloc, "enp3s0")
 
 	err = client.SetLogger(firecracker.LoggerConfig{
 		LogPath: "/home/aneeshie/sandbox/firecracker-go.log",
@@ -70,6 +70,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	client.Start()
+	err = client.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("VM STARTED")
 
 }
