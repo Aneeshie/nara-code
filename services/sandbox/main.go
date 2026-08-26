@@ -98,6 +98,22 @@ func run() error {
 		return err
 	}
 
+
 	fmt.Println("VM STARTED")
+
+
+	info := network.SSHForSlot(slot)
+	if info != nil {
+		fmt.Println("To SSH into the VM:")
+		fmt.Println("  " + info.SSHClient)
+		fmt.Println("  (requires sshd + your key in the guest's authorized_keys)")
+	}
+
+	// Block until the Firecracker process exits so the VM stays alive.
+	err = proc.Wait()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

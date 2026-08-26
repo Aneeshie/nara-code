@@ -26,6 +26,8 @@ func Start(socketPath string) (*Process, error) {
 		return nil, fmt.Errorf("start Firecracker: %w", err)
 	}
 
+	fmt.Println("firecracker started")
+
 	process := &Process{
 		cmd:        cmd,
 		socketPath: socketPath,
@@ -63,6 +65,14 @@ func Poll(socketPath string) error {
 
 		time.Sleep(50 * time.Millisecond)
 	}
+}
+
+func (p *Process) Wait() error {
+	if p.cmd == nil || p.cmd.Process == nil {
+		return nil
+	}
+
+	return p.cmd.Wait()
 }
 
 func (p *Process) Stop() error {
