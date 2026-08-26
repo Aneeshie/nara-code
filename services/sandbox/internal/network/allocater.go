@@ -12,6 +12,11 @@ type MVMNetworkConfig struct{
 	GuestIP string
 	HostIP string
 	GuestMAC string
+	Mask string
+}
+
+func (c *MVMNetworkConfig) TapAddrWithMask() string {
+	return c.HostIP + "/30"
 }
 
 
@@ -37,11 +42,11 @@ func Allocate(slot int) (*MVMNetworkConfig, error) {
 		GuestIP:    guest_ip,
 		HostIP:     host_ip,
 		GuestMAC:   guestMac,
+		Mask: "/30",
 	}, nil
 }
 
-func ipToHex(ipStr string) (string, error) {
-	ip := net.ParseIP(ipStr)
+func ipToHex(ipStr string) (string, error) { ip := net.ParseIP(ipStr)
 	if ip == nil {
 		return "", fmt.Errorf("Invalid IP")
 	}

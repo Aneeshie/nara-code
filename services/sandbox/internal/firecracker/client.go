@@ -166,6 +166,10 @@ func (c *Client) do(method, path string, body any) error {
 	return nil
 }
 
+func (c *Client) Start() error {
+	return c.SetActions(ActionConfig{ActionType: ActionInstanceStart})
+}
+
 func (c *Client) SetLogger(cfg LoggerConfig) error {
 	return c.do(http.MethodPut, "logger", cfg)
 }
@@ -175,11 +179,7 @@ func (c *Client) SetBootSource(cfg BootSourceConfig) error {
 }
 
 func (c *Client) SetRootFs(cfg RootFsConfig) error {
-	return c.do(http.MethodPut, "drives/rootfs", cfg)
-}
-
-func (c *Client) SetDrive(cfg RootFsConfig) error {
-	return c.do(http.MethodPut, "drives/rootfs", cfg)
+	return c.do(http.MethodPut, "drives/"+cfg.DriveID, cfg)
 }
 
 func (c *Client) SetNetworkInterface(cfg NetworkInterfaceConfig) error {
