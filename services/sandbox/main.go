@@ -20,10 +20,14 @@ func run() error {
 
 	client := firecracker.NewClient(socketPath)
 
-	alloc, err := network.Allocate(0)
+	slot := network.NextAvailable()
+
+	alloc, err := network.Allocate(slot)
 	if err != nil {
 		return err
 	}
+
+	defer network.Release(slot)
 
 	err = network.SetupTap(alloc)
 	if err != nil {
@@ -45,7 +49,7 @@ func run() error {
 
 	err = client.SetLogger(firecracker.LoggerConfig{
 		LogPath: "/home/aneeshie/sandbox/firecracker-go.log",
-		Level: "Debug",
+		Level: firecracker.LevelFilterDebug,
 		ShowLevel: true,
 		ShowLogOrigin: true,
 	})	
