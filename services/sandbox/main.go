@@ -9,24 +9,38 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		log.Fatal(err)
+	}
+
+}	
+
+func run() error {
 	socketPath := "/tmp/firecracker.socket"
 
 	client := firecracker.NewClient(socketPath)
 
 	alloc, err := network.Allocate(0)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = network.SetupTap(alloc)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	err = network.EnableInternetAccess(alloc, "enp3s0")
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	proc, err := firecracker.Start(socketPath)
+	if err != nil {
+		return err
+	}
+
+	defer proc.Stop()
 
 
 	err = client.SetLogger(firecracker.LoggerConfig{
@@ -37,16 +51,18 @@ func main() {
 	})	
 
 	if err != nil {
-		log.Fatal(err)
+		proc.Stop()
+		return err
 	}
 
 	err = client.SetBootSource(firecracker.BootSourceConfig{
 		KernelImagePath: "/home/aneeshie/sandbox/vmlinux-6.18.41",
 		BootArgs: "console=ttyS0 reboot=k panic=1",
 	})
-	
+
 	if err != nil {
-		log.Fatal(err)
+		proc.Stop()
+		return err
 	}
 
 	err = client.SetRootFs(firecracker.RootFsConfig{
@@ -57,7 +73,8 @@ func main() {
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		proc.Stop()
+		return err
 	}
 
 	err = client.SetNetworkInterface(firecracker.NetworkInterfaceConfig{
@@ -67,14 +84,16 @@ func main() {
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		proc.Stop()
+		return err
 	}
 
 	err = client.Start()
 	if err != nil {
-		log.Fatal(err)
+		proc.Stop()
+		return err
 	}
 
 	fmt.Println("VM STARTED")
-
+	return nil
 }
